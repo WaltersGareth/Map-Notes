@@ -54,7 +54,5 @@ Panel {
         }
 
     }
-
-   //Component.onCompleted: txtNote.forceActiveFocus()
 }
 

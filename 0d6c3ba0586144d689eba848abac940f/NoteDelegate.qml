@@ -7,12 +7,15 @@ import ArcGIS.AppFramework.Controls 1.0
 
 Panel {
     height: 80 * app.scaleFactor
-
     signal deleteRow()
+
 
     MouseArea {
         anchors.fill: parent
-        onClicked: contentPanel.contentItem = 3
+        onClicked: {
+            pressedIndex = index;
+            contentPanel.contentItem = 3;
+        }
     }
 
     RowLayout {
@@ -64,16 +67,11 @@ Panel {
                     fontAwesomeCode: "\uf1f8"
                     textSize: 15 * app.scaleFactor
 
-                    onClicked: deleteRow()
+                    onClicked: notesView.dbDeleteRowData(index)
                 }
 
 
             }
         }
     }
-
-
-    //    MouseArea {
-
-    //    }
 }

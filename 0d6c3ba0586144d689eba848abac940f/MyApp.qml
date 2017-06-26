@@ -34,6 +34,8 @@ App {
     property bool dbEnabled: true
     property real toolbarHeight: 50 * app.scaleFactor
 
+    property int pressedIndex
+
     FontLoader{
         id: segoe
         source: app.folder.fileUrl("fonts/segoeui.ttf")
@@ -43,6 +45,10 @@ App {
         id: fontAwesome
     }
 
+    DatabaseModel {
+        id: listModel
+    }
+
     ColumnLayout {
         spacing:  3 * app.scaleFactor
         anchors.fill: parent
@@ -50,7 +56,7 @@ App {
         MainBar {
             id: mainBar
             Layout.fillWidth: true
-            Layout.preferredHeight: contentPanel.contentItem !== 1 ? toolbarHeight : 0
+            Layout.preferredHeight: contentPanel.contentItem == 1 ? 0 : contentPanel.contentItem == 3 ? 0 : toolbarHeight
         }
 
         ContentPanel {
@@ -65,9 +71,8 @@ App {
             id: textBar
             panelColor: "#E1F5FE"
             Layout.alignment: Qt.AlignBottom
-            //Layout.fillHeight: true
             Layout.fillWidth: true
-            Layout.preferredHeight: contentPanel.contentItem !== 2 ? toolbarHeight : 0
+            Layout.preferredHeight: contentPanel.contentItem <= 1 ? toolbarHeight : 0
         }
     }
 
@@ -82,14 +87,8 @@ App {
             clip: true
             spacing: 5
 
+            model: listModel
 
-            model: ListModel{
-                id: listModel
-                Component.onCompleted: {
-                    initialize();
-                    notesView.positionViewAtEnd();
-                }
-            }
             delegate: NoteDelegate{
                 id: notesDelegate
                 anchors {
@@ -97,20 +96,12 @@ App {
                     right: parent.right
                     margins: 3 * app.scaleFactor
                 }
-                onDeleteRow: {
-                    console.log("DELETE...", index);
-                    db.transaction(function (tx) {
-                        var results = tx.executeSql('DELETE FROM Notes where rowid = ' + index);
-                        console.log("results length", results.rows.length);
-                        listModel.remove(index);
-                    })
-                }
             }
 
             function initialize() {
                 db.transaction(function(tx) {
-//                    var dropResult = tx.executeSql('DROP TABLE IF EXISTS Notes');
-//                    console.log("drop", JSON.stringify(dropResult, undefined, 2));
+                    //                    var dropResult = tx.executeSql('DROP TABLE IF EXISTS Notes');
+                    //                    console.log("drop", JSON.stringify(dropResult, undefined, 2));
 
                     var results = tx.executeSql("CREATE TABLE IF NOT EXISTS Notes(note TEXT, date DATE, image TEXT, latitude REAL, longitude REAL, status INTEGER)");
 
@@ -164,9 +155,20 @@ App {
                 notesView.forceActiveFocus();
             }
 
+            function dbDeleteRowData(index){
+                console.log("DELETE...", index);
+                db.transaction(function (tx) {
+                    var results = tx.executeSql('DELETE FROM Notes where rowid = ' + index);
+                    console.log("results length", results.rows.length);
+                    listModel.remove(index);
+                })
+            }
+
             Component.onCompleted: {
                 // This connects to the textbar submit button signal and allows the dbAddRow signal to execute the append code for the list Model.
                 textBar.submitted.connect(dbAddData);
+                notesView.initialize();
+                notesView.positionViewAtEnd();
             }
         }
     }
