@@ -20,6 +20,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.LocalStorage 2.0
 import QtQuick.Controls.Styles 1.4
+import QtPositioning 5.3
 
 import ArcGIS.AppFramework 1.0
 import ArcGIS.AppFramework.Controls 1.0
@@ -34,6 +35,7 @@ App {
     property bool dbEnabled: true
     property real toolbarHeight: 50 * app.scaleFactor
 
+    //These properties are used when the SingleNotePanel is being used.
     property int pressedIndex
     property string photoFileName
 
@@ -46,15 +48,28 @@ App {
         id: fontAwesome
     }
 
+    //This sets the location for the captured pictures to be stored.
     FileFolder {
         id: imagesFolder
         path: AppFramework.standardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
     }
 
-    DatabaseModel {
+    //This is the model used for both the main notes page and the single note page
+    ListModel {
         id: databaseListModel
     }
 
+    PositionSource {
+        id: src
+        updateInterval: 1000
+        active: true
+
+        onPositionChanged: {
+
+        }
+    }
+
+    //This sets out the UI of the main page
     ColumnLayout {
         spacing:  3 * app.scaleFactor
         anchors.fill: parent
@@ -82,6 +97,7 @@ App {
         }
     }
 
+    //The following components are used to populate the contentPanel(main section)
     Component {
         id: notesComponent
 
@@ -123,12 +139,14 @@ App {
                     var results = tx.executeSql('SELECT * FROM Notes');
                     for (var i = 0; i < results.rows.length; i++) {
                         databaseListModel.append({
-                                             id: results.rows.item(i).rowid,
-                                             date: results.rows.item(i).date,
-                                             note: results.rows.item(i).note,
-                                             imageName: results.rows.item(i).image,
-                                             status: results.rows.item(i).status
-                                         })
+                                                     id: results.rows.item(i).rowid,
+                                                     date: results.rows.item(i).date,
+                                                     note: results.rows.item(i).note,
+                                                     imageName: results.rows.item(i).image,
+                                                     longitude: results.rows.item(i).longitude,
+                                                     latitude: results.rows.item(i).latitude,
+                                                     status: results.rows.item(i).status
+                                                 })
                     }
                 })
             }
@@ -137,19 +155,24 @@ App {
                 //Add data to notes table
                 db.transaction(
                             function(tx){
-                                var insertResult = tx.executeSql('INSERT INTO Notes (note, date, image, status) VALUES (?, ?, ?, ?)', [ textBar.txtNote.text, Date(), photoFileName, 1 ]);
+                                var coord = src.position.coordinate;
+                                console.log("Coordinate:", coord.longitude, coord.latitude);
+
+                                var insertResult = tx.executeSql('INSERT INTO Notes (note, date, image, latitude, longitude, status) VALUES (?, ?, ?, ?, ?, ?)', [ textBar.txtNote.text, Date(), photoFileName, coord.latitude, coord.longitude, 1 ]);
 
                                 db.transaction(function (tx) {
                                     var results = tx.executeSql('SELECT * FROM Notes where rowid = ' + insertResult.insertId );
                                     console.log("results length", results.rows.length);
                                     for (var i = 0; i < results.rows.length; i++) {
                                         databaseListModel.append({
-                                                             id: results.rows.item(i).rowid,
-                                                             date: results.rows.item(i).date,
-                                                             note: results.rows.item(i).note,
-                                                             imageName : results.rows.item(i).image,
-                                                             status: results.rows.item(i).status
-                                                         })
+                                                                     id: results.rows.item(i).rowid,
+                                                                     date: results.rows.item(i).date,
+                                                                     note: results.rows.item(i).note,
+                                                                     imageName : results.rows.item(i).image,
+                                                                     longitude: results.rows.item(i).longitude,
+                                                                     latitude: results.rows.item(i).latitude,
+                                                                     status: results.rows.item(i).status
+                                                                 })
                                     }
                                 })
                             }
@@ -200,10 +223,11 @@ App {
         }
     }
 
+    //The following scripts are used for managing the database
     function dbGetHandle()
     {
         try {
-            var db = LocalStorage.openDatabaseSync("DateNoteDB", "1.0", "DateNote Database", 1000000)
+            var db = LocalStorage.openDatabaseSync("MapNotesDB", "1.0", "Map-Notes Database", 1000000)
         } catch (err) {
             dbEnabled = false
             console.log("Error opening database: " + err)

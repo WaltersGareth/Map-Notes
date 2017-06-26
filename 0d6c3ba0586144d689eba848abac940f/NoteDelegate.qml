@@ -39,7 +39,7 @@ Panel {
             spacing: 2
 
             Text {
-                text: note + ", " + status
+                text: note
                 font.pointSize: 20
                 font.family: segoe.name
                 wrapMode: Text.WrapAnywhere
