@@ -12,11 +12,6 @@ Item {
     property alias camera: camera
     visible: false
 
-    FileFolder {
-        id: imagesFolder
-        path: AppFramework.standardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
-    }
-
     Camera {
         id: camera
         captureMode: Camera.CaptureStillImage
@@ -77,7 +72,9 @@ Item {
                         zeroPad(imageDate.getUTCSeconds(), 2) +
                         ".jpg";
 
-                cameraPanel.camera.imageCapture.captureToLocation(imagesFolder.filePath(imageName));
+                photoFileName = imageName;
+                cameraPanel.camera.imageCapture.captureToLocation(imagesFolder.filePath(photoFileName));
+
             }
 
             function zeroPad(num, places) {

@@ -50,7 +50,7 @@ Panel {
             fontAwesomeCode: "\uf1d8"
             buttonEnabled: txtNote.text > ""
 
-            onClicked: submitted();
+            onClicked: {submitted(); console.log(photoPreview.source)}
         }
 
     }

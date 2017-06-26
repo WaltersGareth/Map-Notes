@@ -35,6 +35,7 @@ App {
     property real toolbarHeight: 50 * app.scaleFactor
 
     property int pressedIndex
+    property string photoFileName
 
     FontLoader{
         id: segoe
@@ -45,8 +46,13 @@ App {
         id: fontAwesome
     }
 
+    FileFolder {
+        id: imagesFolder
+        path: AppFramework.standardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
+    }
+
     DatabaseModel {
-        id: listModel
+        id: databaseListModel
     }
 
     ColumnLayout {
@@ -87,7 +93,7 @@ App {
             clip: true
             spacing: 5
 
-            model: listModel
+            model: databaseListModel
 
             delegate: NoteDelegate{
                 id: notesDelegate
@@ -116,11 +122,11 @@ App {
                 db.transaction(function (tx) {
                     var results = tx.executeSql('SELECT * FROM Notes');
                     for (var i = 0; i < results.rows.length; i++) {
-                        listModel.append({
+                        databaseListModel.append({
                                              id: results.rows.item(i).rowid,
                                              date: results.rows.item(i).date,
                                              note: results.rows.item(i).note,
-                                             //imageName: results.rows.item(i).image
+                                             imageName: results.rows.item(i).image,
                                              status: results.rows.item(i).status
                                          })
                     }
@@ -131,17 +137,17 @@ App {
                 //Add data to notes table
                 db.transaction(
                             function(tx){
-                                var insertResult = tx.executeSql('INSERT INTO Notes (note, date, status) VALUES (?, ?, ?)', [ textBar.txtNote.text, Date(), 1 ]);
+                                var insertResult = tx.executeSql('INSERT INTO Notes (note, date, image, status) VALUES (?, ?, ?, ?)', [ textBar.txtNote.text, Date(), photoFileName, 1 ]);
 
                                 db.transaction(function (tx) {
                                     var results = tx.executeSql('SELECT * FROM Notes where rowid = ' + insertResult.insertId );
                                     console.log("results length", results.rows.length);
                                     for (var i = 0; i < results.rows.length; i++) {
-                                        listModel.append({
+                                        databaseListModel.append({
                                                              id: results.rows.item(i).rowid,
                                                              date: results.rows.item(i).date,
                                                              note: results.rows.item(i).note,
-                                                             //imageName : results.rows.item(i).image,
+                                                             imageName : results.rows.item(i).image,
                                                              status: results.rows.item(i).status
                                                          })
                                     }
@@ -160,7 +166,7 @@ App {
                 db.transaction(function (tx) {
                     var results = tx.executeSql('DELETE FROM Notes where rowid = ' + index);
                     console.log("results length", results.rows.length);
-                    listModel.remove(index);
+                    databaseListModel.remove(index);
                 })
             }
 

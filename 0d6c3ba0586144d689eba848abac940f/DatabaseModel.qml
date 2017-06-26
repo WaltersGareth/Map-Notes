@@ -8,5 +8,4 @@ import ArcGIS.AppFramework 1.0
 import ArcGIS.AppFramework.Controls 1.0
 
 ListModel{
-    id: listModel
 }
