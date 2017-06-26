@@ -8,40 +8,36 @@ Panel {
         anchors {
             left: parent.left
             right: parent.right
-            top: parent.top
         }
 
         spacing: 5 * app.scaleFactor
 
-        Text {
+        TextEdit {
             text: databaseListModel.get(pressedIndex).note
             font.pointSize: 20
             font.family: segoe.name
             wrapMode: Text.WrapAnywhere
             Layout.fillWidth: true
-            //elide: Text.ElideRight
-            //maximumLineCount: 1
+            enabled: false //Allow user to edit the note. and then obviously handle the code to update.
+
         }
 
         Image {
             source: imagesFolder.url + "//" + databaseListModel.get(pressedIndex).imageName
             fillMode: Image.PreserveAspectFit
             Layout.fillWidth: true
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: contentPanel.contentItem = 0;
-            }
         }
 
         Map {
             Layout.fillWidth: true
-            Layout.preferredHeight: app.width
-            plugin:         Plugin {
+            Layout.preferredHeight: width
+            enabled: false
+            plugin: Plugin {
                 id: mapPlguin
-                name: "esri"
+                preferred: ["ArcGIS"]
             }
-            center: QtPositioning.coordinate(databaseListModel.get(pressedIndex).latitude, databaseListModel.get(pressedIndex).longitude) // Oslo
+
+            center: QtPositioning.coordinate(databaseListModel.get(pressedIndex).latitude, databaseListModel.get(pressedIndex).longitude)
             zoomLevel: 18
 
             MapQuickItem {
@@ -52,22 +48,22 @@ Panel {
                     longitude: databaseListModel.get(pressedIndex).longitude
                 }
 
-                //                anchorPoint {
-                //                    x: markerImage.width/2
-                //                    y: 0 //markerImage.height/2
-                //                }
+                anchorPoint {
+                    x: marker.width/2
+                    y: marker.height
+                }
 
                 sourceItem: FontAwesomeButton {
+                    id: marker
                     fontAwesomeCode: "\uf041"
                     buttonColor: "#E91E63"
-                    enabled: false
+                    buttonEnabled: false
+                    textSize: 35 * app.scaleFactor
                 }
             }
         }
 
     }
-
-
 
     Component.onCompleted: {
         console.log("!", databaseListModel.get(pressedIndex).note, databaseListModel.get(pressedIndex).imageName)

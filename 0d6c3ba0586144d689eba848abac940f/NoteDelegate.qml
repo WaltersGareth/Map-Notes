@@ -5,6 +5,8 @@ import QtQuick.Layouts 1.1
 import ArcGIS.AppFramework 1.0
 import ArcGIS.AppFramework.Controls 1.0
 
+import "./functions.js" as JS
+
 Panel {
     height: 80 * app.scaleFactor
     signal deleteRow()
@@ -65,12 +67,10 @@ Panel {
 
                 FontAwesomeButton {
                     fontAwesomeCode: "\uf1f8"
-                    textSize: 15 * app.scaleFactor
+                    //textSize: 25 * app.scaleFactor
 
-                    onClicked: notesView.dbDeleteRowData(index)
+                    onClicked: JS.dbDeleteRowData(index)
                 }
-
-
             }
         }
     }

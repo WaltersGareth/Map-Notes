@@ -6,7 +6,7 @@
         "location": true,
         "microphone": false,
         "network": true,
-        "storage": false
+        "storage": true
     },
     "deployment": {
         "android": {
@@ -24,6 +24,11 @@
             "packageDisplayName": ""
         }
     },
+    "devicesTypes": [
+        "desktop",
+        "tablet",
+        "phone"
+    ],
     "display": {
         "desktop": {
             "fullScreen": false,
@@ -32,12 +37,16 @@
         },
         "phone": {
             "landscape": true,
-            "portrait": true
+            "portrait": true,
+            "showStatusBar": true
         },
         "tablet": {
             "landscape": true,
-            "portrait": true
+            "portrait": true,
+            "showStatusBar": true
         }
+    },
+    "environment": {
     },
     "mainFile": "MyApp.qml",
     "projectFile": "MapNotes.qmlproject",
@@ -53,6 +62,6 @@
     "urlScheme": "",
     "version": {
         "major": 1,
-        "micro": 21
+        "micro": 28
     }
 }

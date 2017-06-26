@@ -21,6 +21,16 @@ Panel {
 
         spacing: 5
 
+        FontAwesomeButton {
+            id: backButton
+            buttonEnabled: false
+            fontAwesomeCode: "\uf053"
+            buttonColor: "#FAFAFA"
+            visible: contentPanel.contentItem !== 0
+
+            onClicked: contentPanel.contentItem = 0
+        }
+
         Item {
             Layout.fillWidth: true
         }
